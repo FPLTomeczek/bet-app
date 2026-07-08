@@ -1,18 +1,24 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>d8f8471c-28fa-4ff0-a012-c9aedd1fc79a</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
+    <!-- Direct reference overrides the vulnerable 2.0.0 pulled in transitively (NU1903 / GHSA-v5pm-xwqc-g5wc).
+         Kept on the 2.x line to stay API-compatible with Microsoft.AspNetCore.OpenApi 10.0.9. -->
+    <PackageReference Include="Microsoft.OpenApi" Version="2.9.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.16.10" />
   </ItemGroup>
 
 </Project>

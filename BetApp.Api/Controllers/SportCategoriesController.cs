@@ -46,6 +46,14 @@ public class SportCategoriesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<SportCategoryResponse>> Create(CreateSportCategoryRequest request)
     {
+        // Name has a unique index — pre-check to return a clean 400 instead of
+        // letting the DB constraint surface as a raw 500.
+        if (await _context.SportCategories.AnyAsync(c => c.Name == request.Name))
+        {
+            ModelState.AddModelError(nameof(request.Name), "A category with this name already exists.");
+            return ValidationProblem(ModelState);
+        }
+
         var category = new SportCategory { Name = request.Name };
 
         _context.SportCategories.Add(category);
@@ -65,6 +73,12 @@ public class SportCategoriesController : ControllerBase
 
         if (category is null)
             return NotFound();
+
+        if (await _context.SportCategories.AnyAsync(c => c.Name == request.Name && c.Id != id))
+        {
+            ModelState.AddModelError(nameof(request.Name), "A category with this name already exists.");
+            return ValidationProblem(ModelState);
+        }
 
         // EF tracks the entity loaded via FindAsync — changing a field is enough,
         // SaveChanges will emit an UPDATE only for the modified columns.

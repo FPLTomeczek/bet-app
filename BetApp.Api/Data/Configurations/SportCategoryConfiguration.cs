@@ -9,7 +9,10 @@ public class SportCategoryConfiguration : IEntityTypeConfiguration<SportCategory
     public void Configure(EntityTypeBuilder<SportCategory> builder)
     {
         builder.Property(x => x.Name)
-            .HasMaxLength(50)
+            .HasMaxLength(100)
             .IsRequired();
+
+        builder.HasIndex(x => x.Name)
+            .IsUnique();
     }
 }

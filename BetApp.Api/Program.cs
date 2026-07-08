@@ -17,7 +17,15 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<BetAppContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("BetApp"))
-           .UseSnakeCaseNamingConvention());
+           .UseSnakeCaseNamingConvention()
+           // Curated development seed. EF invokes these on Migrate(), EnsureCreated()
+           // and on `dotnet ef database update`. The CLI uses the async path; a
+           // synchronous Migrate() in code would use the sync path — so both are
+           // implemented. SeedData guards against re-seeding a non-empty database.
+           .UseSeeding((context, _) =>
+               SeedData.Seed((BetAppContext)context))
+           .UseAsyncSeeding((context, _, cancellationToken) =>
+               SeedData.SeedAsync((BetAppContext)context, cancellationToken)));
 
 var app = builder.Build();
 

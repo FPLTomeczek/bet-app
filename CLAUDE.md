@@ -5,7 +5,8 @@
 - Zawsze **wyjaśniaj uzasadnienie architektoniczne PRZED szczegółami implementacji**. Pokazuj trade-offy.
 - **Preferuję krytyczny feedback nad potakiwaniem.** Kwestionuj moje decyzje, gdy coś się nie spina. Jeśli prowadzenie jest zbyt „za rączkę" (hand-holding) albo za mało rygorystyczne — powiedz to wprost.
 - Odpowiadaj **po polsku** (terminy techniczne mogą zostać po angielsku).
-- ewentualne komentarze w kodzie w języku angielskim
+- Ewentualne komentarze w kodzie w języku angielskim.
+- Jeśli kod wymaga napisania testów, to je wygeneruj.
 
 ## Architektura warstw
 - **Cienki kontroler** (thin controller) → `DbContext` bezpośrednio jest OK **dla czystego CRUD-u** (brak reguł biznesowych, walidacja to najwyżej „czy FK istnieje").

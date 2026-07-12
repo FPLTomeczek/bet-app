@@ -13,6 +13,14 @@
     <!-- Direct reference overrides the vulnerable 2.0.0 pulled in transitively (NU1903 / GHSA-v5pm-xwqc-g5wc).
          Kept on the 2.x line to stay API-compatible with Microsoft.AspNetCore.OpenApi 10.0.9. -->
     <PackageReference Include="Microsoft.OpenApi" Version="2.9.0" />
+    <!-- Declared explicitly: this project uses both directly (DbContext; HasDefaultValueSql,
+         HasColumnType and UseNpgsql are Relational APIs), so their version must not be left
+         to whatever a transitive dependency happens to pin. Design is PrivateAssets=all, so
+         referencing projects (the test project) would otherwise resolve these down to
+         Npgsql's lower bound while the API itself builds against 10.0.9 — the MSB3277
+         version conflict. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

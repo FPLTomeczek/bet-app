@@ -58,12 +58,11 @@ public class CouponService
         if (errors.Count > 0)
             return Result<CouponResponse>.Invalid(errors);
 
-        // --- Business calculation: accumulator odds = product of selection odds;
-        //     payout = stake * odds. This is the core reason a coupon needs a service. ---
-        var totalOdds = Math.Round(
-            request.Selections.Aggregate(1m, (acc, s) => acc * s.Odds),
-            3, MidpointRounding.AwayFromZero);
-        var potentialPayout = Math.Round(request.Stake * totalOdds, 2, MidpointRounding.AwayFromZero);
+        // --- Business calculation. Delegated to CouponCalculator so the maths can be
+        //     tested without a database standing in the way. ---
+        var totalOdds = CouponCalculator.CalculateTotalOdds(
+            request.Selections.Select(s => s.Odds).ToList());
+        var potentialPayout = CouponCalculator.CalculatePotentialPayout(request.Stake, totalOdds);
 
         var coupon = new Coupon
         {

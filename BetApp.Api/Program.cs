@@ -15,6 +15,10 @@ builder.Services.AddControllers()
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+// Domain/business logic lives in services, kept out of the controllers.
+// Scoped: one instance per HTTP request, matching the DbContext lifetime it uses.
+builder.Services.AddScoped<BetApp.Api.Services.CouponService>();
+
 builder.Services.AddDbContext<BetAppContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("BetApp"))
            .UseSnakeCaseNamingConvention()

@@ -7,6 +7,12 @@
 - Odpowiadaj **po polsku** (terminy techniczne mogą zostać po angielsku).
 - ewentualne komentarze w kodzie w języku angielskim
 
+## Architektura warstw
+- **Cienki kontroler** (thin controller) → `DbContext` bezpośrednio jest OK **dla czystego CRUD-u** (brak reguł biznesowych, walidacja to najwyżej „czy FK istnieje").
+- **Gdy pojawia się logika biznesowa** (obliczenia, reguły domenowe, koordynacja wielu encji, np. liczenie kursów/wypłaty kuponu, uzgadnianie salda, hashowanie hasła) — wydziel ją do klasy w folderze `Services/` i wstrzykuj do kontrolera przez DI (`AddScoped`). Kontroler zostaje tłumaczem HTTP ↔ domena.
+- **Serwis NIE zna HTTP** (żadnego `ModelState`/`ActionResult`). Błędy walidacji zwraca w typie domenowym `Result<T>` (`Services/Result.cs`); kontroler mapuje je na `ValidationProblem`.
+- **Nie zakładaj serwisów „na zapas".** Dodawaj je tam, gdzie logika realnie istnieje — nie dla każdej encji z automatu (to zbędny balast). Pierwszy zrealizowany przykład: `CouponService`.
+
 ## Stack
 - **Baza:** PostgreSQL 17 w Dockerze (docker-compose, named volume)
 - **Backend:** .NET SDK 10.x, ASP.NET Core Web API (kontrolery), EF Core, Npgsql — podejście **code-first**

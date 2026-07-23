@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace BetApp.Api.Models;
 
 public class EventParticipant
@@ -12,3 +14,7 @@ public class EventParticipant
     public Team? Team { get; set; }
     public Player? Player { get; set; }
 }
+
+// String-serialized in JSON and OpenAPI via [JsonConverter] on the type.
+[JsonConverter(typeof(JsonStringEnumConverter<ParticipantSide>))]
+public enum ParticipantSide { Home, Away }

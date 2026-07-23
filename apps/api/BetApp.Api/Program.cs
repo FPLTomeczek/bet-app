@@ -6,14 +6,26 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers()
-    // Serialize/deserialize enums as their string name over HTTP, matching how
-    // they are stored in the database (HasConversion<string>()). Without this,
-    // System.Text.Json uses numbers and rejects string values like "Home".
-    .AddJsonOptions(options =>
-        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
+// Enums serialize as their string name via a [JsonConverter] attribute on each
+// enum type (see the Models). That attribute is honored by both the JSON serializer
+// and the OpenAPI schema generator, so the wire format and the published contract
+// stay in sync. A global converter here would only cover serialization — leaving the
+// schema to report `integer` — so it is deliberately omitted.
+builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+// CORS is a *browser* enforcement: the API answers fine, but the browser rejects
+// a cross-origin response (front on :3000, API on :5075 = different origins)
+// unless it carries Access-Control-* headers. This policy is Development-only —
+// in production the front is served behind the same origin/proxy, so a permissive
+// policy there would only widen the attack surface for no benefit.
+const string DevCorsPolicy = "DevFrontend";
+builder.Services.AddCors(options =>
+    options.AddPolicy(DevCorsPolicy, policy =>
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()));
 
 // Domain/business logic lives in services, kept out of the controllers.
 // Scoped: one instance per HTTP request, matching the DbContext lifetime it uses.
@@ -40,9 +52,18 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     // Renders the interactive UI at /scalar, consuming the document above
     app.MapScalarApiReference();
-}
 
-app.UseHttpsRedirection();
+    // Allow the Next.js dev server to consume the API from the browser.
+    app.UseCors(DevCorsPolicy);
+}
+else
+{
+    // Only redirect to HTTPS outside Development. Under the `https` launch profile
+    // this would answer the front's http://:5075 calls with a 307 to https://:7083,
+    // and a redirected cross-origin request is a common source of silent CORS
+    // failures. In Development the front talks plain HTTP, so we skip it.
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthorization();
 

@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace BetApp.Api.Models;
 
 public class AppUser
@@ -13,3 +15,7 @@ public class AppUser
     public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
     public ICollection<Coupon> Coupons { get; set; } = new List<Coupon>();
 }
+
+// String-serialized in JSON and OpenAPI via [JsonConverter] on the type.
+[JsonConverter(typeof(JsonStringEnumConverter<UserStatus>))]
+public enum UserStatus { Active, Suspended, Closed }

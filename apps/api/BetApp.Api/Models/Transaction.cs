@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace BetApp.Api.Models;
 
 public class Transaction
@@ -12,3 +14,10 @@ public class Transaction
 
     public AppUser? User { get; set; }
 }
+
+// String-serialized in JSON and OpenAPI via [JsonConverter] on the type.
+[JsonConverter(typeof(JsonStringEnumConverter<TransactionType>))]
+public enum TransactionType { Deposit, Withdrawal }
+
+[JsonConverter(typeof(JsonStringEnumConverter<TransactionStatus>))]
+public enum TransactionStatus { Pending, Completed, Failed }

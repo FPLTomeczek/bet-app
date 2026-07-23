@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace BetApp.Api.Models;
 
 public class Coupon
@@ -15,3 +17,7 @@ public class Coupon
     public Bonus? Bonus { get; set; }
     public ICollection<CouponSelection> Selections { get; set; } = new List<CouponSelection>();
 }
+
+// String-serialized in JSON and OpenAPI via [JsonConverter] on the type.
+[JsonConverter(typeof(JsonStringEnumConverter<CouponStatus>))]
+public enum CouponStatus { Placed, Won, Lost, Cancelled, CashedOut }

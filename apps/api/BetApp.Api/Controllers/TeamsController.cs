@@ -18,6 +18,7 @@ public class TeamsController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType<IEnumerable<TeamResponse>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<TeamResponse>>> GetAll()
     {
         var teams = await _context.Teams
@@ -29,6 +30,8 @@ public class TeamsController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [ProducesResponseType<TeamResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<TeamResponse>> GetById(int id)
     {
         var team = await _context.Teams.FindAsync(id);
@@ -40,6 +43,8 @@ public class TeamsController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType<TeamResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<TeamResponse>> Create(CreateTeamRequest request)
     {
         if (!await _context.SportCategories.AnyAsync(c => c.Id == request.SportCategoryId))
@@ -64,6 +69,9 @@ public class TeamsController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(int id, UpdateTeamRequest request)
     {
         var team = await _context.Teams.FindAsync(id);
@@ -87,6 +95,8 @@ public class TeamsController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
     {
         var team = await _context.Teams.FindAsync(id);

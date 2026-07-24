@@ -21,6 +21,7 @@ public class TransactionsController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType<IEnumerable<TransactionResponse>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<TransactionResponse>>> GetAll()
     {
         var transactions = await _context.Transactions
@@ -32,6 +33,8 @@ public class TransactionsController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [ProducesResponseType<TransactionResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<TransactionResponse>> GetById(int id)
     {
         var transaction = await _context.Transactions.FindAsync(id);
@@ -43,6 +46,8 @@ public class TransactionsController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType<TransactionResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<TransactionResponse>> Create(CreateTransactionRequest request)
     {
         if (!await _context.AppUsers.AnyAsync(u => u.Id == request.UserId))

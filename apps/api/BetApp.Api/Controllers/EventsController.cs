@@ -6,6 +6,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BetApp.Api.Controllers;
 
+// [ProducesResponseType] declares what this controller *can* answer. The OpenAPI
+// generator reads only static metadata — a `return NotFound()` inside a method body
+// is invisible to it, and an undeclared action is published as a bare "200 OK".
+// Without these attributes the document promised 200 where the code actually returns
+// 201 or 204, and never mentioned 404/400 at all. Keep them in sync with the returns:
+// nothing enforces that, so a drifting attribute silently lies to the frontend.
+//
+// Bodies are not empty: under [ApiController] a client-error result is mapped to
+// ProblemDetails (404) or ValidationProblemDetails (400, carries the per-field
+// `errors` dictionary), both served as application/problem+json.
 [ApiController]
 [Route("api/[controller]")]
 public class EventsController : ControllerBase
@@ -20,6 +30,7 @@ public class EventsController : ControllerBase
     // ---- event CRUD ----
 
     [HttpGet]
+    [ProducesResponseType<IEnumerable<EventResponse>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<EventResponse>>> GetAll()
     {
         var events = await _context.Events
@@ -31,6 +42,8 @@ public class EventsController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [ProducesResponseType<EventResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<EventResponse>> GetById(int id)
     {
         var ev = await _context.Events.FindAsync(id);
@@ -42,6 +55,8 @@ public class EventsController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType<EventResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<EventResponse>> Create(CreateEventRequest request)
     {
         if (!await _context.SportCategories.AnyAsync(c => c.Id == request.SportCategoryId))
@@ -67,6 +82,9 @@ public class EventsController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(int id, UpdateEventRequest request)
     {
         var ev = await _context.Events.FindAsync(id);
@@ -91,6 +109,8 @@ public class EventsController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
     {
         var ev = await _context.Events.FindAsync(id);
@@ -107,6 +127,8 @@ public class EventsController : ControllerBase
     // ---- participants (sub-resource of an event, no standalone controller) ----
 
     [HttpGet("{eventId:int}/participants")]
+    [ProducesResponseType<IEnumerable<EventParticipantResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<IEnumerable<EventParticipantResponse>>> GetParticipants(int eventId)
     {
         if (!await _context.Events.AnyAsync(e => e.Id == eventId))
@@ -122,6 +144,8 @@ public class EventsController : ControllerBase
     }
 
     [HttpGet("{eventId:int}/participants/{participantId:int}")]
+    [ProducesResponseType<EventParticipantResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<EventParticipantResponse>> GetParticipant(int eventId, int participantId)
     {
         var participant = await _context.EventParticipants
@@ -135,6 +159,9 @@ public class EventsController : ControllerBase
     }
 
     [HttpPost("{eventId:int}/participants")]
+    [ProducesResponseType<EventParticipantResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<EventParticipantResponse>> AddParticipant(int eventId, CreateEventParticipantRequest request)
     {
         if (!await _context.Events.AnyAsync(e => e.Id == eventId))
@@ -169,6 +196,8 @@ public class EventsController : ControllerBase
     }
 
     [HttpDelete("{eventId:int}/participants/{participantId:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RemoveParticipant(int eventId, int participantId)
     {
         var participant = await _context.EventParticipants

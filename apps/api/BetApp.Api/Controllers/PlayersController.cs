@@ -18,6 +18,7 @@ public class PlayersController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType<IEnumerable<PlayerResponse>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<PlayerResponse>>> GetAll()
     {
         var players = await _context.Players
@@ -29,6 +30,8 @@ public class PlayersController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [ProducesResponseType<PlayerResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<PlayerResponse>> GetById(int id)
     {
         var player = await _context.Players.FindAsync(id);
@@ -40,6 +43,8 @@ public class PlayersController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType<PlayerResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<PlayerResponse>> Create(CreatePlayerRequest request)
     {
         if (request.TeamId is int teamId && !await _context.Teams.AnyAsync(t => t.Id == teamId))
@@ -65,6 +70,9 @@ public class PlayersController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(int id, UpdatePlayerRequest request)
     {
         var player = await _context.Players.FindAsync(id);
@@ -89,6 +97,8 @@ public class PlayersController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
     {
         var player = await _context.Players.FindAsync(id);

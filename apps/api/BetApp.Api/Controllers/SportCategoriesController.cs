@@ -19,6 +19,7 @@ public class SportCategoriesController : ControllerBase
 
     // GET api/sportcategories
     [HttpGet]
+    [ProducesResponseType<IEnumerable<SportCategoryResponse>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<SportCategoryResponse>>> GetAll()
     {
         // The projection to a DTO runs on the database side: SELECT "Id","Name".
@@ -32,6 +33,8 @@ public class SportCategoriesController : ControllerBase
 
     // GET api/sportcategories/5
     [HttpGet("{id:int}")]
+    [ProducesResponseType<SportCategoryResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<SportCategoryResponse>> GetById(int id)
     {
         var category = await _context.SportCategories.FindAsync(id);
@@ -44,6 +47,8 @@ public class SportCategoriesController : ControllerBase
 
     // POST api/sportcategories
     [HttpPost]
+    [ProducesResponseType<SportCategoryResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<SportCategoryResponse>> Create(CreateSportCategoryRequest request)
     {
         // Name has a unique index — pre-check to return a clean 400 instead of
@@ -67,6 +72,9 @@ public class SportCategoriesController : ControllerBase
 
     // PUT api/sportcategories/5
     [HttpPut("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(int id, UpdateSportCategoryRequest request)
     {
         var category = await _context.SportCategories.FindAsync(id);
@@ -90,6 +98,8 @@ public class SportCategoriesController : ControllerBase
 
     // DELETE api/sportcategories/5
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
     {
         var category = await _context.SportCategories.FindAsync(id);

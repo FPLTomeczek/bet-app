@@ -18,6 +18,7 @@ public class BonusesController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType<IEnumerable<BonusResponse>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<BonusResponse>>> GetAll()
     {
         var bonuses = await _context.Bonuses
@@ -29,6 +30,8 @@ public class BonusesController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [ProducesResponseType<BonusResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<BonusResponse>> GetById(int id)
     {
         var bonus = await _context.Bonuses.FindAsync(id);
@@ -39,7 +42,11 @@ public class BonusesController : ControllerBase
         return Ok(new BonusResponse(bonus.Id, bonus.Name, bonus.Type, bonus.Value, bonus.ValidFrom, bonus.ValidTo));
     }
 
+    // No manual validation here, but the DTO carries DataAnnotations — [ApiController]
+    // validates them before the action runs, so 400 is still a reachable outcome.
     [HttpPost]
+    [ProducesResponseType<BonusResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<BonusResponse>> Create(CreateBonusRequest request)
     {
         var bonus = new Bonus
@@ -59,6 +66,9 @@ public class BonusesController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(int id, UpdateBonusRequest request)
     {
         var bonus = await _context.Bonuses.FindAsync(id);
@@ -77,6 +87,8 @@ public class BonusesController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
     {
         var bonus = await _context.Bonuses.FindAsync(id);

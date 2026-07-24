@@ -18,6 +18,7 @@ public class ArticlesController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType<IEnumerable<ArticleResponse>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<ArticleResponse>>> GetAll()
     {
         var articles = await _context.Articles
@@ -29,6 +30,8 @@ public class ArticlesController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [ProducesResponseType<ArticleResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ArticleResponse>> GetById(int id)
     {
         var article = await _context.Articles.FindAsync(id);
@@ -40,6 +43,8 @@ public class ArticlesController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType<ArticleResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ArticleResponse>> Create(CreateArticleRequest request)
     {
         if (request.SportCategoryId is int categoryId && !await _context.SportCategories.AnyAsync(c => c.Id == categoryId))
@@ -65,6 +70,9 @@ public class ArticlesController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(int id, UpdateArticleRequest request)
     {
         var article = await _context.Articles.FindAsync(id);
@@ -89,6 +97,8 @@ public class ArticlesController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
     {
         var article = await _context.Articles.FindAsync(id);

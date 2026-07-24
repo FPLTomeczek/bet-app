@@ -18,6 +18,7 @@ public class AppUsersController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType<IEnumerable<AppUserResponse>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<AppUserResponse>>> GetAll()
     {
         // PasswordHash is deliberately never projected into the response.
@@ -30,6 +31,8 @@ public class AppUsersController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [ProducesResponseType<AppUserResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<AppUserResponse>> GetById(int id)
     {
         var user = await _context.AppUsers.FindAsync(id);
@@ -41,6 +44,8 @@ public class AppUsersController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType<AppUserResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<AppUserResponse>> Create(CreateAppUserRequest request)
     {
         if (await _context.AppUsers.AnyAsync(u => u.Username == request.Username))
@@ -70,6 +75,9 @@ public class AppUsersController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(int id, UpdateAppUserRequest request)
     {
         var user = await _context.AppUsers.FindAsync(id);
@@ -94,6 +102,8 @@ public class AppUsersController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
     {
         var user = await _context.AppUsers.FindAsync(id);

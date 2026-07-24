@@ -25,12 +25,15 @@ public class CouponsController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType<IEnumerable<CouponResponse>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<CouponResponse>>> GetAll()
     {
         return Ok(await _couponService.GetAllAsync());
     }
 
     [HttpGet("{id:int}")]
+    [ProducesResponseType<CouponResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CouponResponse>> GetById(int id)
     {
         var coupon = await _couponService.GetByIdAsync(id);
@@ -41,7 +44,11 @@ public class CouponsController : ControllerBase
         return Ok(coupon);
     }
 
+    // Domain errors from CouponService (unknown event, closed selection, insufficient
+    // funds) all surface as 400 with the same per-field shape as model validation.
     [HttpPost]
+    [ProducesResponseType<CouponResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<CouponResponse>> Create(CreateCouponRequest request)
     {
         var result = await _couponService.PlaceCouponAsync(request);

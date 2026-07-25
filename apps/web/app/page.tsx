@@ -1,65 +1,73 @@
-import Image from "next/image";
+import { type EventResponse } from "./lib/api";
+import { getEvents } from "./lib/queries";
 
-export default function Home() {
+// ISR: cache the rendered page and regenerate at most every 30s. The event list is a
+// slow-changing catalogue, so we don't opt into force-dynamic (per-request render).
+export const revalidate = 30;
+
+export default async function Home() {
+  const events = await getEvents();
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main className="mx-auto min-h-screen max-w-3xl px-6 py-12 font-sans">
+      <h1 className="mb-1 text-2xl font-semibold tracking-tight">Wydarzenia</h1>
+      <p className="mb-8 text-sm text-zinc-500">
+        {events.length} {events.length === 1 ? "wydarzenie" : "wydarzeń"} z API
+      </p>
+
+      <ul className="flex flex-col gap-2">
+        {events.map((event) => (
+          <EventRow key={event.id} event={event} />
+        ))}
+      </ul>
+    </main>
+  );
+}
+
+function EventRow({ event }: { event: EventResponse }) {
+  const start = new Date(event.startTime).toLocaleString("pl-PL", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return (
+    <li className="flex items-center justify-between gap-4 rounded-lg border border-black/[.08] px-4 py-3 dark:border-white/[.12]">
+      <div className="min-w-0">
+        <p className="truncate font-medium">{event.name}</p>
+        <p className="text-sm text-zinc-500">{start}</p>
+      </div>
+      <div className="flex shrink-0 items-center gap-3">
+        {event.result && (
+          <span className="tabular-nums text-sm font-medium">{event.result}</span>
+        )}
+        <StatusBadge status={event.status} />
+      </div>
+    </li>
+  );
+}
+
+// `status` is the string union from the contract, so these Record lookups are exhaustive
+// — dropping a case is a compile error.
+function StatusBadge({ status }: { status: EventResponse["status"] }) {
+  const styles: Record<EventResponse["status"], string> = {
+    Scheduled: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300",
+    Live: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
+    Finished: "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300",
+    Cancelled: "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
+  };
+
+  const labels: Record<EventResponse["status"], string> = {
+    Scheduled: "Zaplanowane",
+    Live: "Na żywo",
+    Finished: "Zakończone",
+    Cancelled: "Odwołane",
+  };
+
+  return (
+    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${styles[status]}`}>
+      {labels[status]}
+    </span>
   );
 }

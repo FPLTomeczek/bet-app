@@ -28,6 +28,8 @@ Konsekwencja praktyczna: **zmiana API i jej użycie we froncie idą w jednym com
   - dokument: `http://localhost:5075/openapi/v1.json`
   - UI (Scalar): `http://localhost:5075/scalar`
 - Front **nie przepisuje typów ręcznie** — generuje je z tego dokumentu. Ręcznie przepisany interfejs TS to kopia prawdy, która cicho się rozjeżdża; wygenerowany typ psuje build, gdy kontrakt się zmieni. O to nam chodzi.
+- **Generacja:** `npm --prefix apps/web run gen:api` (API musi działać) → `apps/web/app/lib/api-types.ts`. Plik jest **commitowany** — dzięki temu repo buduje się bez żywego API, a diff w PR pokazuje każdą zmianę kontraktu. Front sięga po typy przez `apps/web/app/lib/api.ts`.
+- Enumy jadą po HTTP jako **string** dzięki `[JsonConverter(typeof(JsonStringEnumConverter<T>))]` na samym typie enuma (w modelach) — atrybut widzi zarówno serializer, jak i generator schematu OpenAPI, więc wire format i kontrakt się nie rozjeżdżają. (Globalna rejestracja konwertera by tego nie dała — schemat raportowałby `integer`.)
 
 ## Uruchomienie (dwa procesy)
 ```bash
@@ -36,7 +38,9 @@ dotnet run --project apps/api/BetApp.Api  # 2. API  → http://localhost:5075
 npm --prefix apps/web run dev             # 3. Web  → http://localhost:3000
 ```
 
-## Znane luki (do zrobienia przy pierwszym realnym spięciu front↔API)
-- **Brak CORS** w `apps/api/BetApp.Api/Program.cs` — przeglądarka zablokuje wywołania z `localhost:3000`. Do skonfigurowania (polityka tylko dla Development).
-- **`UseHttpsRedirection`** przy wywołaniach z frontu po HTTP — do przemyślenia, którym portem gada front.
+## Znane luki
 - **Brak uwierzytelniania** — `AppUser` istnieje, ale nie ma logowania ani autoryzacji.
+
+Rozwiązane przy pierwszym spięciu front↔API:
+- ~~**Brak CORS**~~ — polityka `DevFrontend` (tylko Development, origin `http://localhost:3000`) w `Program.cs`.
+- ~~**`UseHttpsRedirection` po HTTP**~~ — teraz aktywne tylko poza Development; w Development front gada po HTTP bez redirectu, który psułby CORS.

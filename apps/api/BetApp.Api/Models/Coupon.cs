@@ -18,6 +18,5 @@ public class Coupon
     public ICollection<CouponSelection> Selections { get; set; } = new List<CouponSelection>();
 }
 
-// String-serialized in JSON and OpenAPI via [JsonConverter] on the type.
 [JsonConverter(typeof(JsonStringEnumConverter<CouponStatus>))]
 public enum CouponStatus { Placed, Won, Lost, Cancelled, CashedOut }

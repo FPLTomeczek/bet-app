@@ -19,7 +19,6 @@ public record UpdateEventRequest(
     EventStatus Status,
     [MaxLength(50)] string? Result);
 
-// event_participant is managed as a sub-resource of event (no standalone controller).
 public record EventParticipantResponse(int Id, int EventId, int? TeamId, int? PlayerId, ParticipantSide? Side);
 
 public record CreateEventParticipantRequest(int? TeamId, int? PlayerId, ParticipantSide? Side);

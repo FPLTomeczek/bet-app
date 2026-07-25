@@ -16,6 +16,5 @@ public class CouponSelection
     public Event? Event { get; set; }
 }
 
-// String-serialized in JSON and OpenAPI via [JsonConverter] on the type.
 [JsonConverter(typeof(JsonStringEnumConverter<SelectionResult>))]
 public enum SelectionResult { Open, Won, Lost, Void }

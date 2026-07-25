@@ -15,8 +15,6 @@ public class TeamConfiguration : IEntityTypeConfiguration<Team>
         builder.Property(x => x.Country)
             .HasMaxLength(60);
 
-        // ImageUrl maps to TEXT (no length limit).
-
         builder.HasOne(x => x.SportCategory)
             .WithMany()
             .HasForeignKey(x => x.SportCategoryId)

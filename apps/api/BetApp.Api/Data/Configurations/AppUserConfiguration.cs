@@ -16,7 +16,6 @@ public class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
             .HasMaxLength(255)
             .IsRequired();
 
-        // PasswordHash maps to TEXT.
         builder.Property(x => x.PasswordHash)
             .IsRequired();
 

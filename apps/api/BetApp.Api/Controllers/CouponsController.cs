@@ -4,15 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BetApp.Api.Controllers;
 
-// A coupon is the aggregate root: it is placed together with its selections in a
-// single request, and its financial figures (total odds, potential payout) are
-// computed by the server. Selections are not edited independently, so there is no
-// standalone coupon_selection controller. PUT/DELETE are intentionally omitted —
-// a placed coupon changes only through settlement, which would be a dedicated
-// state-transition endpoint rather than a free-form edit.
-//
-// This controller is a thin translator: it delegates all domain work to
-// CouponService and only maps the outcome onto HTTP responses.
+// A coupon is the aggregate root: placed together with its selections in one request,
+// with its financial figures computed server-side — hence no standalone selection
+// controller. PUT/DELETE are intentionally omitted: a placed coupon changes only
+// through settlement, a dedicated state transition rather than a free-form edit.
 [ApiController]
 [Route("api/[controller]")]
 public class CouponsController : ControllerBase
@@ -44,8 +39,6 @@ public class CouponsController : ControllerBase
         return Ok(coupon);
     }
 
-    // Domain errors from CouponService (unknown event, closed selection, insufficient
-    // funds) all surface as 400 with the same per-field shape as model validation.
     [HttpPost]
     [ProducesResponseType<CouponResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -55,7 +48,6 @@ public class CouponsController : ControllerBase
 
         if (!result.IsSuccess)
         {
-            // Translate domain validation errors into the HTTP-shaped response.
             foreach (var error in result.Errors)
                 ModelState.AddModelError(error.Field, error.Message);
 

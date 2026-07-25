@@ -15,7 +15,6 @@ public class Transaction
     public AppUser? User { get; set; }
 }
 
-// String-serialized in JSON and OpenAPI via [JsonConverter] on the type.
 [JsonConverter(typeof(JsonStringEnumConverter<TransactionType>))]
 public enum TransactionType { Deposit, Withdrawal }
 

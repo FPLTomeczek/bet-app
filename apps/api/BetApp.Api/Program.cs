@@ -4,15 +4,12 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 // Enums serialize as their string name via a [JsonConverter] attribute on each
 // enum type (see the Models). That attribute is honored by both the JSON serializer
 // and the OpenAPI schema generator, so the wire format and the published contract
 // stay in sync. A global converter here would only cover serialization — leaving the
 // schema to report `integer` — so it is deliberately omitted.
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 // CORS is a *browser* enforcement: the API answers fine, but the browser rejects
@@ -45,7 +42,6 @@ builder.Services.AddDbContext<BetAppContext>(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     // Generates the raw OpenAPI document at /openapi/v1.json
@@ -53,7 +49,6 @@ if (app.Environment.IsDevelopment())
     // Renders the interactive UI at /scalar, consuming the document above
     app.MapScalarApiReference();
 
-    // Allow the Next.js dev server to consume the API from the browser.
     app.UseCors(DevCorsPolicy);
 }
 else

@@ -42,8 +42,6 @@ public class BonusesController : ControllerBase
         return Ok(new BonusResponse(bonus.Id, bonus.Name, bonus.Type, bonus.Value, bonus.ValidFrom, bonus.ValidTo));
     }
 
-    // No manual validation here, but the DTO carries DataAnnotations — [ApiController]
-    // validates them before the action runs, so 400 is still a reachable outcome.
     [HttpPost]
     [ProducesResponseType<BonusResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]

@@ -6,16 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BetApp.Api.Controllers;
 
-// [ProducesResponseType] declares what this controller *can* answer. The OpenAPI
-// generator reads only static metadata — a `return NotFound()` inside a method body
-// is invisible to it, and an undeclared action is published as a bare "200 OK".
-// Without these attributes the document promised 200 where the code actually returns
-// 201 or 204, and never mentioned 404/400 at all. Keep them in sync with the returns:
-// nothing enforces that, so a drifting attribute silently lies to the frontend.
-//
-// Bodies are not empty: under [ApiController] a client-error result is mapped to
-// ProblemDetails (404) or ValidationProblemDetails (400, carries the per-field
-// `errors` dictionary), both served as application/problem+json.
 [ApiController]
 [Route("api/[controller]")]
 public class EventsController : ControllerBase
@@ -26,8 +16,6 @@ public class EventsController : ControllerBase
     {
         _context = context;
     }
-
-    // ---- event CRUD ----
 
     [HttpGet]
     [ProducesResponseType<IEnumerable<EventResponse>>(StatusCodes.Status200OK)]
@@ -124,7 +112,7 @@ public class EventsController : ControllerBase
         return NoContent();
     }
 
-    // ---- participants (sub-resource of an event, no standalone controller) ----
+    // Participants are a sub-resource of an event — no standalone controller.
 
     [HttpGet("{eventId:int}/participants")]
     [ProducesResponseType<IEnumerable<EventParticipantResponse>>(StatusCodes.Status200OK)]
@@ -167,7 +155,6 @@ public class EventsController : ControllerBase
         if (!await _context.Events.AnyAsync(e => e.Id == eventId))
             return NotFound();
 
-        // A participant references a team or a player (at least one must be set).
         if (request.TeamId is null && request.PlayerId is null)
             ModelState.AddModelError(nameof(request.TeamId), "A participant must reference a team or a player.");
 

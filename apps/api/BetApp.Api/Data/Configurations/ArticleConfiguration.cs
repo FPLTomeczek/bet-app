@@ -12,7 +12,6 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
             .HasMaxLength(200)
             .IsRequired();
 
-        // Content maps to TEXT.
         builder.Property(x => x.Content)
             .IsRequired();
 

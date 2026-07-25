@@ -17,12 +17,10 @@ public class SportCategoriesController : ControllerBase
         _context = context;
     }
 
-    // GET api/sportcategories
     [HttpGet]
     [ProducesResponseType<IEnumerable<SportCategoryResponse>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<SportCategoryResponse>>> GetAll()
     {
-        // The projection to a DTO runs on the database side: SELECT "Id","Name".
         var categories = await _context.SportCategories
             .AsNoTracking()
             .Select(c => new SportCategoryResponse(c.Id, c.Name))
@@ -31,7 +29,6 @@ public class SportCategoriesController : ControllerBase
         return Ok(categories);
     }
 
-    // GET api/sportcategories/5
     [HttpGet("{id:int}")]
     [ProducesResponseType<SportCategoryResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -45,7 +42,6 @@ public class SportCategoriesController : ControllerBase
         return Ok(new SportCategoryResponse(category.Id, category.Name));
     }
 
-    // POST api/sportcategories
     [HttpPost]
     [ProducesResponseType<SportCategoryResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -66,11 +62,9 @@ public class SportCategoriesController : ControllerBase
 
         var response = new SportCategoryResponse(category.Id, category.Name);
 
-        // 201 Created + Location header pointing to GetById of the new resource.
         return CreatedAtAction(nameof(GetById), new { id = category.Id }, response);
     }
 
-    // PUT api/sportcategories/5
     [HttpPut("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -88,15 +82,12 @@ public class SportCategoriesController : ControllerBase
             return ValidationProblem(ModelState);
         }
 
-        // EF tracks the entity loaded via FindAsync — changing a field is enough,
-        // SaveChanges will emit an UPDATE only for the modified columns.
         category.Name = request.Name;
         await _context.SaveChangesAsync();
 
         return NoContent();
     }
 
-    // DELETE api/sportcategories/5
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]

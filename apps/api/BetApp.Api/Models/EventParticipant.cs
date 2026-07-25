@@ -15,6 +15,5 @@ public class EventParticipant
     public Player? Player { get; set; }
 }
 
-// String-serialized in JSON and OpenAPI via [JsonConverter] on the type.
 [JsonConverter(typeof(JsonStringEnumConverter<ParticipantSide>))]
 public enum ParticipantSide { Home, Away }

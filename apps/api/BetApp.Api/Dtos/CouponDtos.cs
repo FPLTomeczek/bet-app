@@ -16,8 +16,7 @@ public record CouponResponse(
     DateTime PlacedAt,
     IReadOnlyList<CouponSelectionResponse> Selections);
 
-// A coupon is placed atomically with its selections (the coupon is the aggregate root).
-// TotalOdds and PotentialPayout are computed server-side, not supplied by the client.
+// TotalOdds and PotentialPayout are absent here — computed server-side, not client-supplied.
 public record CreateCouponSelectionRequest(
     [Range(1, int.MaxValue)] int EventId,
     [Required][MaxLength(50)] string Market,

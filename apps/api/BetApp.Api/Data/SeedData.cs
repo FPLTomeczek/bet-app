@@ -290,9 +290,7 @@ public static class SeedData
             PublishedAt = Utc(2026, 6, 1, 8, 0),
         };
 
-        // Return the aggregate roots. Categories/teams/bonuses referenced only via
-        // navigations are still tracked, but listing the roots explicitly keeps the
-        // set of top-level inserts obvious.
+        // Aggregate roots only; everything else is reached transitively via navigations.
         return new object[]
         {
             football, basketball, tennis,

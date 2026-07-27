@@ -14,6 +14,21 @@ Zaimportowany wyżej `AGENTS.md` ostrzega, że **ta wersja Next.js różni się 
 ## Typy z API
 Typy DTO **generujemy z OpenAPI**, nie przepisujemy ręcznie (patrz „Kontrakt API ↔ front" w roocie). Ręczna kopia typu rozjeżdża się po cichu — wygenerowany typ psuje build, gdy backend zmieni kontrakt.
 
+## Struktura folderu trasy
+Dziel kod **modułowo**. Moduł = folder z głównym komponentem, a obok — **tylko jeśli potrzebne** — pliki wg roli (żadnych pustych plików „na zapas"):
+
+| Plik | Zawiera |
+|---|---|
+| `page.tsx` / `<moduł>.tsx` | główny komponent (jedna funkcja); w trasie `page.tsx` + ewentualny config segmentu Next |
+| `helpers.ts` | funkcje pomocnicze (formatowanie, transformacje) |
+| `constants.ts` | stałe, typy, interfejsy |
+| `use-<nazwa>.ts` | hook — jeden plik na hook, nazwany od nazwy hooka (`use-events.ts` → `useEvents`) |
+| `<moduł>.test.tsx` | testy modułu |
+
+Reguły i wyjątki:
+- **Config segmentu Next (`export const revalidate`, `dynamic`, …) zostaje w `page.tsx`.** Next czyta go przez **statyczną analizę pliku-segmentu** — re-eksport z `constants.ts` nie zadziała. To kontrakt frameworka, nie stała aplikacji.
+- **Komponent feature vs prymityw DS:** komponent znający DTO domenowe (`EventRow`) zostaje przy module; generyczny prymityw prezentacyjny (`StatusBadge`) to kandydat do warstwy Design System.
+
 ## Uruchomienie
 ```bash
 npm --prefix apps/web install

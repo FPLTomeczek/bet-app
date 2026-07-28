@@ -29,6 +29,23 @@ Reguły i wyjątki:
 - **Config segmentu Next (`export const revalidate`, `dynamic`, …) zostaje w `page.tsx`.** Next czyta go przez **statyczną analizę pliku-segmentu** — re-eksport z `constants.ts` nie zadziała. To kontrakt frameworka, nie stała aplikacji.
 - **Komponent feature vs prymityw DS:** komponent znający DTO domenowe (`EventRow`) zostaje przy module; generyczny prymityw prezentacyjny (`StatusBadge`) to kandydat do warstwy Design System.
 
+## Testy
+**Vitest + React Testing Library** (unit/komponenty). E2E (Playwright) — jeszcze nie ma, dojdzie przy stabilnych flow.
+```bash
+npm --prefix apps/web test         # watch
+npm --prefix apps/web run test:run # jednorazowo (CI)
+```
+Testy leżą przy module jako `<moduł>.test.tsx` (patrz „Struktura folderu trasy").
+
+Co czym testować:
+
+| Kod | Narzędzie | Dlaczego |
+|---|---|---|
+| `helpers.ts` (czyste funkcje) | sam Vitest | najwyższy ROI, zero DOM, testujesz logikę nie framework |
+| `use-*.ts` (hooki) | Vitest + RTL (`renderHook`) | logika stanu klienta |
+| **synchroniczne** komponenty (Server i Client) | Vitest + RTL | renderują się w jsdom |
+| **`async` Server Components**, pełne flow | **E2E**, nie unit | RTL/jsdom nie renderują async RSC — [oficjalne zalecenie Next](node_modules/next/dist/docs/01-app/02-guides/testing/vitest.md) |
+
 ## Uruchomienie
 ```bash
 npm --prefix apps/web install

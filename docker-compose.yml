@@ -3,10 +3,15 @@ services:
     image: postgres:17
     container_name: bet-app
     restart: unless-stopped
+    # Values come from .env (Compose reads it from this directory automatically).
+    # The `:?` form aborts `docker compose up` naming the missing variable, rather
+    # than starting Postgres with a blank password. Note these only take effect on
+    # the FIRST init of an empty data directory - changing them later does not
+    # change the credentials inside the existing `pgdata` volume.
     environment:
-      POSTGRES_USER: tomeks
-      POSTGRES_PASSWORD: testpass
-      POSTGRES_DB: bet-app
+      POSTGRES_USER: ${POSTGRES_USER:?not set - copy .env.example to .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?not set - copy .env.example to .env}
+      POSTGRES_DB: ${POSTGRES_DB:?not set - copy .env.example to .env}
     ports:
       - "5432:5432"
     volumes:

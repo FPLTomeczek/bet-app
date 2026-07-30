@@ -31,12 +31,35 @@ Konsekwencja praktyczna: **zmiana API i jej użycie we froncie idą w jednym com
 - **Generacja:** `npm --prefix apps/web run gen:api` (API musi działać) → `apps/web/app/lib/api-types.ts`. Plik jest **commitowany** — dzięki temu repo buduje się bez żywego API, a diff w PR pokazuje każdą zmianę kontraktu. Front sięga po typy przez `apps/web/app/lib/api.ts`.
 - Enumy jadą po HTTP jako **string** dzięki `[JsonConverter(typeof(JsonStringEnumConverter<T>))]` na samym typie enuma (w modelach) — atrybut widzi zarówno serializer, jak i generator schematu OpenAPI, więc wire format i kontrakt się nie rozjeżdżają. (Globalna rejestracja konwertera by tego nie dała — schemat raportowałby `integer`.)
 
+## Konfiguracja i sekrety
+
+Nowa wartość konfigurowalna → najpierw zaklasyfikuj, potem umieść:
+
+| Kategoria | Kryterium | Gdzie żyje | Przykłady |
+|---|---|---|---|
+| **Sekret** | ujawnienie = incydent | User Secrets (API) / `.env.local` (web) | hasło Postgresa, przyszły klucz JWT |
+| **Config środowiskowy** | nie tajny, ale **różni się** dev/prod | `.env*`, nadpisywany zmienną na prod | `API_BASE_URL`, `POSTGRES_*` |
+| **Stała aplikacji** | taka sama **wszędzie** | zwykły kod | `STATUS_LABELS`, `revalidate = 30` |
+
+Trzeci wiersz to ten, na którym się wykłada — nie przenosić stałych do env. `revalidate` w ogóle nie może tam trafić (Next wymaga literału w pliku segmentu).
+
+**API nie dostaje `.env` — sekrety idą do User Secrets** (leżą poza repo, więc nie da się ich zacommitować). Nie zakładać tam `.env`.
+
 ## Uruchomienie (dwa procesy)
 ```bash
+# 0. Konfiguracja — raz po clone
+cp .env.example .env                      # dane logowania Postgresa (dla compose)
+cp apps/web/.env.example apps/web/.env.local
+dotnet user-secrets set "ConnectionStrings:BetApp" \
+  "Host=localhost;Port=5432;Database=bet-app;Username=<user>;Password=<pass>" \
+  --project apps/api/BetApp.Api           # musi zgadzać się z .env
+
 docker compose up -d                      # 1. Postgres
 dotnet run --project apps/api/BetApp.Api  # 2. API  → http://localhost:5075
 npm --prefix apps/web run dev             # 3. Web  → http://localhost:3000
 ```
+
+> ⚠️ **Zmiana `POSTGRES_*` w istniejącej instalacji nic nie zmienia w bazie.** Te zmienne działają tylko przy **pierwszej** inicjalizacji pustego katalogu danych, a wolumen `pgdata` jest już zainicjalizowany. Zmiana hasła w `.env` jedynie rozjedzie je z connection stringiem i API przestanie się logować. Świadoma zmiana wymaga `docker compose down -v` — co **usuwa dane**; seed odtworzy zestaw dev.
 
 ## Znane luki
 - **Brak uwierzytelniania** — `AppUser` istnieje, ale nie ma logowania ani autoryzacji.

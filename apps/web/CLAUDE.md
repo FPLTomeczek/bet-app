@@ -11,6 +11,14 @@ Zasady ogólne projektu: patrz `CLAUDE.md` w roocie monorepo.
 ## Uwaga o wersji Next.js
 Zaimportowany wyżej `AGENTS.md` ostrzega, że **ta wersja Next.js różni się od danych treningowych modelu**. Przed pisaniem kodu opartego o API frameworka sprawdź `node_modules/next/dist/docs/` zamiast polegać na pamięci.
 
+## Zmienne środowiskowe
+Kontrakt: `.env.example` (commitowany) → `.env.local` (ignorowany). Co jest sekretem, co configiem, a co stałą: „Konfiguracja i sekrety" w roocie.
+
+- **`process.env` czytamy wyłącznie w `app/lib/env.ts`**, reszta importuje `env`.
+- **Bez cichych fallbacków** — brakująca zmienna to twardy błąd, także w `next build` (prerender ładuje ten moduł). Nie dopisywać `?? "localhost..."`.
+- **Nowa zmienna dla przeglądarki wymaga decyzji, nie prefiksu.** `NEXT_PUBLIC_` wkleja wartość do bundla na etapie builda — powody i pułapki w komentarzu `env.ts`; mechanika w docsach Nexta (patrz uwaga o wersji wyżej).
+- **Vitest nie wczytuje plików `.env` Nexta.** Jeśli test potrzebuje zmiennej, to sygnał, że dosięgnął klienta API i należy go zamockować — nie karmić URL-em. W ostateczności `vi.stubEnv` w tym jednym pliku, nie globalny `test.env`.
+
 ## Typy z API
 Typy DTO **generujemy z OpenAPI**, nie przepisujemy ręcznie (patrz „Kontrakt API ↔ front" w roocie). Ręczna kopia typu rozjeżdża się po cichu — wygenerowany typ psuje build, gdy backend zmieni kontrakt.
 
